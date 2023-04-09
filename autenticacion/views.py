@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from perfiles.models import Perfil
+from carreras.models import Carrera
 from .serializers import UTHUsuarioSerializer
 from .forms import UTHUsuarioCreacionForm, UTHUsuarioForm
 
@@ -49,7 +50,8 @@ class Registro(APIView):
             # Validar usuario
             if form_usuario.is_valid():
                 user = form_usuario.save()
-                Perfil.objects.create(usuario=user)
+                carrera = Carrera.objects.get(id=int(request.data['carrera']))
+                Perfil.objects.create(usuario=user, carrera=carrera)
                 return Response({'data': self.serializer(user).data}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': form_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
