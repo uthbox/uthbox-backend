@@ -11,7 +11,7 @@ class Carrera(models.Model):
     nombre_carrera = models.CharField(max_length=255, blank=False, null=False, default=None)
 
     def save(self, *args, **kwargs):
-        self.carrera = self.carrera.title()
+        self.carrera = self.nombre_carrera.title()
         super().save(*args, **kwargs)
 
     def __str__(self):

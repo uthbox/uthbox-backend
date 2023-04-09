@@ -65,11 +65,13 @@ MIDDLEWARE = [
 
 # CORS WHITELIST
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:8000',
-]
+CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000',
+#     'http://localhost:3001',
+#     'http://localhost:8000',
+# ]
 
 
 ROOT_URLCONF = 'uthbox.urls'
@@ -160,6 +162,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Media Files
 
