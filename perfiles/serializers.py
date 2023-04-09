@@ -13,4 +13,4 @@ class PerfilSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Perfil
-        fields = ['foto_perfil', 'carrera', 'verificado']
+        fields = ['foto_de_perfil', 'carrera', 'verificado', 'usuario']

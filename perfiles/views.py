@@ -28,7 +28,7 @@ class PerfilAPIView(APIView):
             # Recolectar Usuario
             perfil = Perfil.objects.get(usuario=request.user)
             # Serializar Usuario
-            perfil_data = PerfilSerializer(perfil).data
+            perfil_data = self.serializer(perfil).data
             # Retornar Usuario
             return Response({'data': perfil_data}, status=status.HTTP_200_OK)
         except:
@@ -47,7 +47,7 @@ class PerfilAPIView(APIView):
             if usuario_form.is_valid() and perfil_form.is_valid():
                 usuario_form.save()
                 perfil_form.save()
-                return Response({'data': PerfilSerializer(perfil).data},  status=status.HTTP_200_OK)
+                return Response({'data': self.serializer(perfil).data},  status=status.HTTP_200_OK)
             else:
                 return Response({'error': usuario_form.errors},  status=status.HTTP_400_BAD_REQUEST)
         except:

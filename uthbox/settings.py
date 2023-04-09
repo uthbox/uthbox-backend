@@ -26,12 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [os.getenv('DOMAIN_BASE'), os.getenv('DOMAIN'), os.getenv('DOMAIN_IP')]
+if not DEBUG:
+    ALLOWED_HOSTS = [os.getenv('DOMAIN_BASE'), os.getenv('DOMAIN'), os.getenv('DOMAIN_IP')]
+    CORS_ORIGIN_ALLOW_ALL = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
 
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000
+if DEBUG:
+    ALLOWED_HOSTS = []
+    CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
@@ -62,16 +67,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# CORS WHITELIST
-
-CORS_ORIGIN_ALLOW_ALL = True
-
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
-#     'http://localhost:3001',
-#     'http://localhost:8000',
-# ]
 
 
 ROOT_URLCONF = 'uthbox.urls'
