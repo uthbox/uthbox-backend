@@ -24,15 +24,15 @@ class PerfilAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            # Recolectar Usuario
-            perfil = Perfil.objects.get(usuario=request.user)
-            # Serializar Usuario
-            perfil_data = self.serializer(perfil).data
-            # Retornar Usuario
-            return Response({'data': perfil_data}, status=status.HTTP_200_OK)
-        except:
-            return Response({'error': 'Perfil no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        # try:
+        # Recolectar Usuario
+        perfil = Perfil.objects.get(usuario=request.user)
+        # Serializar Usuario
+        perfil_data = self.serializer(perfil).data
+        # Retornar Usuario
+        return Response({'data': perfil_data}, status=status.HTTP_200_OK)
+        # except:
+        #     return Response({'error': 'Perfil no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
     def patch(self, request):
         try:
@@ -49,7 +49,7 @@ class PerfilAPIView(APIView):
                 perfil_form.save()
                 return Response({'data': self.serializer(perfil).data},  status=status.HTTP_200_OK)
             else:
-                return Response({'error': usuario_form.errors},  status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': perfil_form.errors},  status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'error': 'Error al actualizar el usuario'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -103,3 +103,23 @@ class PerfilesAPIView(APIView):
             return Response({'data': data}, status=status.HTTP_200_OK)
         except:
             return Response({'error': 'Error al recolectar resultado'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SeguirPerfilAPIView(APIView):
+
+    serializer = PerfilSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def patch(self, request):
+        try:
+            seguidos = request.data.get('seguidos')
+            perfil = Perfil.objects.get(usuario__pk=request.user.pk)
+            perfil.siguiendo.add(*seguidos)
+            data = self.serializer(perfil).data
+            return Response({'data': data}, status=status.HTTP_200_OK)
+        except:
+            return Response({'error': 'Error al intentar seguir perfil'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
