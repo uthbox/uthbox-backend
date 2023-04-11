@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from notificaciones.models import Notificacion
 from .models import Grupo
 from .forms import GrupoForm
 from .serializers import GrupoSerializer
@@ -97,8 +98,10 @@ class AgregarIntegranteAPIView(APIView):
     def patch(self, request, pk=None):
         try:
             integrantes = request.data.get('integrantes')
+            usuario = User.objects.get(pk=integrantes[0])
             grupo = Grupo.objects.get(pk=pk, activo=True)
-            grupo.usuarios.add(*integrantes)
+            grupo.usuarios.add(usuario)
+            Notificacion.objects.create(titulo=grupo.nombre, mensaje='{} {} te ha agregado al grupo de {}'.format(request.user.first_name, request.user.last_name, grupo.nombre), usuario=usuario, usuario_creador=request.user)
             data = self.serializer(grupo).data
             return Response({'data': data}, status=status.HTTP_200_OK)
         except:

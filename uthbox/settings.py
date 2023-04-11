@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'perfiles',
     'grupos',
     'archivos',
-    'carreras'
+    'carreras',
+    'notificaciones'
 ]
 
 MIDDLEWARE = [

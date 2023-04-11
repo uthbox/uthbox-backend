@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
 from autenticacion.forms import UTHUsuarioForm
+from notificaciones.models import Notificacion
 from .serializers import PerfilSerializer
 from .models import Perfil, Relaciones
 from .forms import PerfilForm
@@ -112,17 +113,18 @@ class RelacionesAPIView(APIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request):
-        try:
+        # try:
             # Recolectar payload
             usuario_seguido = request.data.get('usuario_seguido')
             perfil_seguido = Perfil.objects.get(usuario__pk=usuario_seguido)
             perfil_siguiendo = Perfil.objects.get(usuario=request.user)
             # Crear Relacion
             Relaciones.objects.create(usuario_siguiendo=perfil_siguiendo, usuario_seguido=perfil_seguido)
+            Notificacion.objects.create(titulo='Solicitud de Amistad', mensaje='{} {} te ha seguido'.format(request.user.first_name, request.user.last_name), usuario=perfil_seguido.usuario, usuario_creador=request.user)
             # Respuesta de API
             return Response({'data': self.serializer(perfil_siguiendo).data}, status=status.HTTP_200_OK)
-        except:
-            return Response({'error': 'Error en la creacion de relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except:
+        #     return Response({'error': 'Error en la creacion de relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, pk=None):
         try:
