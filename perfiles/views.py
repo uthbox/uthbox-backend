@@ -7,7 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
 from autenticacion.forms import UTHUsuarioForm
 from .serializers import PerfilSerializer
-from .models import Perfil
+from .models import Perfil, Relaciones
 from .forms import PerfilForm
 
 User = get_user_model()
@@ -105,21 +105,36 @@ class PerfilesAPIView(APIView):
             return Response({'error': 'Error al recolectar resultado'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class SeguirPerfilAPIView(APIView):
+class RelacionesAPIView(APIView):
 
     serializer = PerfilSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
-    def patch(self, request):
+    def post(self, request):
         try:
-            seguidos = request.data.get('seguidos')
-            perfil = Perfil.objects.get(usuario__pk=request.user.pk)
-            perfil.siguiendo.add(*seguidos)
-            data = self.serializer(perfil).data
-            return Response({'data': data}, status=status.HTTP_200_OK)
+            # Recolectar payload
+            usuario_seguido = request.data.get('usuario_seguido')
+            perfil_seguido = Perfil.objects.get(usuario__pk=usuario_seguido)
+            perfil_siguiendo = Perfil.objects.get(usuario=request.user)
+            # Crear Relacion
+            Relaciones.objects.create(usuario_siguiendo=perfil_siguiendo, usuario_seguido=perfil_seguido)
+            # Respuesta de API
+            return Response({'data': self.serializer(perfil_siguiendo).data}, status=status.HTTP_200_OK)
         except:
-            return Response({'error': 'Error al intentar seguir perfil'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'Error en la creacion de relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, pk=None):
+        try:
+            # Recolectar payload
+            perfil_usuario_eliminado = Perfil.objects.get(usuario__pk=pk)
+            perfil_operando = Perfil.objects.get(usuario=request.user)
+            relacion = Relaciones.objects.get(usuario_seguido=perfil_usuario_eliminado, usuario_siguiendo=perfil_operando)
+            # Eliminar Relacion
+            relacion.delete()
+            # Respuesta de API
+            return Response({'data': 'Relacion eliminada correctamente'}, status=status.HTTP_200_OK)
+        except:
+            return Response({'error': 'No se encontro ningun relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
