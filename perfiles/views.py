@@ -140,3 +140,5 @@ class RelacionesAPIView(APIView):
             return Response({'error': 'No se encontro ningun relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+

@@ -24,5 +24,6 @@ urlpatterns = [
     path('grupos/', include('grupos.urls')),
     path('archivos/', include('archivos.urls')),
     path('carreras/', include('carreras.urls')),
-    path('notificaciones/', include('notificaciones.urls'))
+    path('notificaciones/', include('notificaciones.urls')),
+    path('chats/', include('chats.urls'))
 ]

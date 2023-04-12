@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 if not DEBUG:
     ALLOWED_HOSTS = [os.getenv('DOMAIN_BASE'), os.getenv('DOMAIN'), os.getenv('DOMAIN_IP')]
@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'grupos',
     'archivos',
     'carreras',
-    'notificaciones'
+    'notificaciones',
+    'chats'
 ]
 
 MIDDLEWARE = [

@@ -25,8 +25,8 @@ class Relaciones(models.Model):
     """
         DOCSTRING: Social, clase intermediaria para el manejo de relaciones sociales.
     """
-    usuario_siguiendo = models.OneToOneField(Perfil, on_delete=models.CASCADE, blank=False, null=False, related_name='creador')
-    usuario_seguido = models.OneToOneField(Perfil, on_delete=models.CASCADE, blank=False, null=False, related_name='blanco')
+    usuario_siguiendo = models.ForeignKey(Perfil, on_delete=models.CASCADE, blank=False, null=False, related_name='creador')
+    usuario_seguido = models.ForeignKey(Perfil, on_delete=models.CASCADE, blank=False, null=False, related_name='blanco')
 
     def __str__(self):
         siguiendo_nombre = '{} {}'.format(self.usuario_siguiendo.usuario.first_name, self.usuario_siguiendo.usuario.last_name)
