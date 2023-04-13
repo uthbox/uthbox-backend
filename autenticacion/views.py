@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
+from django.http import HttpResponse
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from perfiles.models import Perfil
 from carreras.models import Carrera
 from .serializers import UTHUsuarioSerializer
 from .forms import UTHUsuarioCreacionForm, UTHUsuarioForm
+from utilities.mailing import enviar_verificacion
 
 User = get_user_model()
 
@@ -28,6 +30,9 @@ class Autenticacion(APIView):
             # Recoleccion de datos
             usuario = request.data['username']
             contrasena = request.data['password']
+            perfil = Perfil.objects.get(usuario__username=usuario)
+            if not perfil.verificado:
+                return Response({'error': 'Usuario aun no verificado.'}, status=status.HTTP_400_BAD_REQUEST)
             autenticado = authenticate(request, username=usuario, password=contrasena)
             if autenticado is not None:
                 token, _ = Token.objects.get_or_create(user=autenticado)
@@ -52,6 +57,7 @@ class Registro(APIView):
                 user = form_usuario.save()
                 carrera = Carrera.objects.get(id=int(request.data['carrera']))
                 Perfil.objects.create(usuario=user, carrera=carrera)
+                enviar_verificacion(user.email, user.id)
                 return Response({'data': self.serializer(user).data}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': form_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -106,3 +112,20 @@ class Usuarios(APIView):
             return Response({'data': 'Usuario desactivado exitosamente'}, status=status.HTTP_200_OK)
         except:
             return Response({'error': 'Error en la desactivacion del usuario'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerificacionAPIView(APIView):
+    """
+        DOCSTRING: VerificacionAPIView, APIView responsable de la verificacion de identidad de usuarios.
+    """
+    def get(self, request, pk=None):
+        try:
+            # Recoleccion del usuario
+            perfil = Perfil.objects.get(usuario__pk=pk)
+            # Verificacion de Usuario
+            perfil.verificado = True
+            perfil.save()
+            # Respuesta del APIView
+            return HttpResponse("Usuario verificado! Sientase libre de cerrar esta pestaña y disfrutar de nuestra aplicacion.")
+        except:
+            return HttpResponse("Ocurrio un error en la verificacion de este usuario.")
