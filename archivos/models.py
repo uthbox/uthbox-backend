@@ -12,7 +12,7 @@ class Archivo(models.Model):
         de uno a uno con la clase Grupo
     """
     archivo = models.FileField(upload_to='archivos', blank=False, null=False, default=None)
-    grupo = models.OneToOneField(Grupo, on_delete=models.CASCADE, blank=False, null=False)
+    grupo = models.ForeignKey(Grupo, on_delete=models.CASCADE, blank=False, null=False)
     activo = models.BooleanField(blank=False, null=False, default=True)
     creado_por = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False, default=None)
 

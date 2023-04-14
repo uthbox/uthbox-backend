@@ -37,14 +37,12 @@ class PerfilAPIView(APIView):
 
     def patch(self, request):
         try:
-            # Recolectar Datos
-            data = request.data
             # Recolectar Instancia
             perfil = Perfil.objects.get(usuario=request.user)
             usuario = User.objects.get(pk=request.user.pk)
             # Validar Datos
-            perfil_form = PerfilForm(data, instance=perfil)
-            usuario_form = UTHUsuarioForm(data, instance=usuario)
+            perfil_form = PerfilForm(request.data, request.FILES, instance=perfil)
+            usuario_form = UTHUsuarioForm(request.data, instance=usuario)
             if usuario_form.is_valid() and perfil_form.is_valid():
                 usuario_form.save()
                 perfil_form.save()
