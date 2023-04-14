@@ -14,7 +14,7 @@ class Archivo(models.Model):
     archivo = models.FileField(upload_to='archivos', blank=False, null=False, default=None)
     grupo = models.OneToOneField(Grupo, on_delete=models.CASCADE, blank=False, null=False)
     activo = models.BooleanField(blank=False, null=False, default=True)
-    creado_por = models.OneToOneField(User, on_delete=models.CASCADE, blank=False, null=False, default=None)
+    creado_por = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False, default=None)
 
     def __str__(self):
         return self.archivo.name
