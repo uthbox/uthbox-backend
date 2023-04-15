@@ -129,7 +129,7 @@ class RelacionesAPIView(APIView):
             # Recolectar payload
             usuario_seguido = request.data.get('usuario_seguido')
             perfil_seguido = Perfil.objects.get(pk=usuario_seguido)
-            perfil_siguiendo = Perfil.objects.get(usuario=request.user.perfil)
+            perfil_siguiendo = Perfil.objects.get(usuario=request.user)
             # Crear Relacion
             Relaciones.objects.create(usuario_siguiendo=perfil_siguiendo, usuario_seguido=perfil_seguido)
             Notificacion.objects.create(titulo='Solicitud de Amistad', mensaje='{} {} te ha seguido'.format(request.user.first_name, request.user.last_name), usuario=perfil_seguido.usuario, usuario_creador=request.user)
