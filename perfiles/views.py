@@ -91,13 +91,16 @@ class PerfilesAPIView(APIView):
     """
 
     serializer = PerfilSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request, pk=None):
         try:
             seguido = False
             if pk:
+                print(request.user.perfil)
                 resultado = Perfil.objects.get(pk=pk)
-                seguido = len(Relaciones.objects.get(usuario_siguiendo=request.user, usuario_seguido=resultado)) > 0
+                seguido = len(Relaciones.objects.filter(usuario_siguiendo=request.user.perfil, usuario_seguido=resultado)) > 0
             else:
                 resultado = Perfil.objects.all()
             data = PerfilSerializer(resultado, many=pk is None).data
