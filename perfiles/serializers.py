@@ -9,15 +9,10 @@ class PerfilSerializer(serializers.ModelSerializer):
 
     usuario = UTHUsuarioSerializer()
     carrera = CarreraSerializer()
-    siguiendo = serializers.SerializerMethodField()
 
     class Meta:
         model = Perfil
-        fields = ['id', 'foto_de_perfil', 'siguiendo', 'carrera', 'verificado', 'usuario']
-
-    def get_siguiendo(self, obj):
-        relaciones = Relaciones.objects.filter(usuario_siguiendo=obj)
-        return RelacionesSerializer(relaciones, many=True).data
+        fields = ['id', 'foto_de_perfil', 'carrera', 'verificado', 'usuario']
 
 
 class RelacionesSerializer(serializers.ModelSerializer):

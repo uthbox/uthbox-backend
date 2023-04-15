@@ -7,7 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
 from autenticacion.forms import UTHUsuarioForm
 from notificaciones.models import Notificacion
-from .serializers import PerfilSerializer
+from .serializers import PerfilSerializer, RelacionesSerializer
 from .models import Perfil, Relaciones
 from .forms import PerfilForm
 
@@ -94,40 +94,51 @@ class PerfilesAPIView(APIView):
 
     def get(self, request, pk=None):
         try:
+            seguido = False
             if pk:
                 resultado = Perfil.objects.get(pk=pk)
+                seguido = len(Relaciones.objects.get(usuario_siguiendo=request.user, usuario_seguido=resultado)) > 0
             else:
                 resultado = Perfil.objects.all()
             data = PerfilSerializer(resultado, many=pk is None).data
-            return Response({'data': data}, status=status.HTTP_200_OK)
+            return Response({'data': data, 'seguido': seguido}, status=status.HTTP_200_OK)
         except:
             return Response({'error': 'Error al recolectar resultado'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RelacionesAPIView(APIView):
 
-    serializer = PerfilSerializer
+    serializer = RelacionesSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    def get(self, request):
+        try:
+            # Recolectar payload
+            relaciones = Relaciones.objects.filter(usuario_siguiendo=request.user)
+            # Respuesta de API
+            return Response({'data': self.serializer(relaciones, many=True).data}, status=status.HTTP_200_OK)
+        except:
+            return Response({'error': 'Error en la extraccion de usuarios seguidos'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def post(self, request):
-        # try:
+        try:
             # Recolectar payload
             usuario_seguido = request.data.get('usuario_seguido')
-            perfil_seguido = Perfil.objects.get(usuario__pk=usuario_seguido)
+            perfil_seguido = Perfil.objects.get(pk=usuario_seguido)
             perfil_siguiendo = Perfil.objects.get(usuario=request.user)
             # Crear Relacion
             Relaciones.objects.create(usuario_siguiendo=perfil_siguiendo, usuario_seguido=perfil_seguido)
             Notificacion.objects.create(titulo='Solicitud de Amistad', mensaje='{} {} te ha seguido'.format(request.user.first_name, request.user.last_name), usuario=perfil_seguido.usuario, usuario_creador=request.user)
             # Respuesta de API
             return Response({'data': self.serializer(perfil_siguiendo).data}, status=status.HTTP_200_OK)
-        # except:
-        #     return Response({'error': 'Error en la creacion de relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except:
+            return Response({'error': 'Error en la creacion de relacion'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, pk=None):
         try:
             # Recolectar payload
-            perfil_usuario_eliminado = Perfil.objects.get(usuario__pk=pk)
+            perfil_usuario_eliminado = Perfil.objects.get(pk=pk)
             perfil_operando = Perfil.objects.get(usuario=request.user)
             relacion = Relaciones.objects.get(usuario_seguido=perfil_usuario_eliminado, usuario_siguiendo=perfil_operando)
             # Eliminar Relacion

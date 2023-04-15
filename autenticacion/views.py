@@ -10,7 +10,7 @@ from rest_framework import status
 from perfiles.models import Perfil
 from carreras.models import Carrera
 from .serializers import UTHUsuarioSerializer
-from .forms import UTHUsuarioCreacionForm, UTHUsuarioForm
+from .forms import UTHUsuarioCreacionForm, UTHUsuarioForm, UTHUsuarioCambiarContrasenaForm
 from utilities.mailing import enviar_verificacion
 
 User = get_user_model()
@@ -129,3 +129,22 @@ class VerificacionAPIView(APIView):
             return HttpResponse("Usuario verificado! Sientase libre de cerrar esta pestaña y disfrutar de nuestra aplicacion.")
         except:
             return HttpResponse("Ocurrio un error en la verificacion de este usuario.")
+
+
+class CambiarContrasenaAPIView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    """
+        DOCSTRING: CambiarContrasenaAPIView, APIView responsable de la actualizacion de contrasenas.
+    """
+    def post(self, request):
+        try:
+            contra_form = UTHUsuarioCambiarContrasenaForm(request.user, request.data)
+            if contra_form.is_valid():
+                contra_form.save()
+                return Response({'data': 'Contraseña actualizada correctamente!'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': contra_form.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'error': 'Error al intentar cambiar la contraseña'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

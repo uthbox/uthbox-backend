@@ -12,7 +12,6 @@ class Perfil(models.Model):
         de uno a uno con dicha clase.
     """
     foto_de_perfil = models.ImageField(upload_to='perfil', blank=True, null=True, default=None)
-    siguiendo = models.ManyToManyField(to='self', through='Relaciones', blank=True, related_name='seguidos', default=None, symmetrical=False)
     carrera = models.ForeignKey(Carrera, blank=True, null=True, on_delete=models.CASCADE, default=None)
     verificado = models.BooleanField(blank=False, null=False, default=False)
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, blank=False, null=False)

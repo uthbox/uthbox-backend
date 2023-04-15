@@ -9,4 +9,4 @@ class PerfilForm(forms.ModelForm):
     """
     class Meta:
         model = Perfil
-        fields = ['foto_de_perfil', 'carrera', 'siguiendo']
+        fields = ['foto_de_perfil', 'carrera']
