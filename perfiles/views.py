@@ -118,7 +118,7 @@ class RelacionesAPIView(APIView):
     def get(self, request):
         try:
             # Recolectar payload
-            relaciones = Relaciones.objects.filter(usuario_siguiendo=request.user)
+            relaciones = Relaciones.objects.filter(usuario_siguiendo=request.user.perfil)
             # Respuesta de API
             return Response({'data': self.serializer(relaciones, many=True).data}, status=status.HTTP_200_OK)
         except:
@@ -129,7 +129,7 @@ class RelacionesAPIView(APIView):
             # Recolectar payload
             usuario_seguido = request.data.get('usuario_seguido')
             perfil_seguido = Perfil.objects.get(pk=usuario_seguido)
-            perfil_siguiendo = Perfil.objects.get(usuario=request.user)
+            perfil_siguiendo = Perfil.objects.get(usuario=request.user.perfil)
             # Crear Relacion
             Relaciones.objects.create(usuario_siguiendo=perfil_siguiendo, usuario_seguido=perfil_seguido)
             Notificacion.objects.create(titulo='Solicitud de Amistad', mensaje='{} {} te ha seguido'.format(request.user.first_name, request.user.last_name), usuario=perfil_seguido.usuario, usuario_creador=request.user)
