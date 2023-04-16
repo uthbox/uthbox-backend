@@ -7,12 +7,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from utilities.mailing import enviar_verificacion, enviar_codigo
+from utilities.authentication import generar_codigo
 from perfiles.models import Perfil
+from perfiles.serializers import PerfilSerializer
 from carreras.models import Carrera
+from .models import CodigosVerificacion
 from .serializers import UTHUsuarioSerializer
 from .forms import UTHUsuarioCreacionForm, UTHUsuarioForm, UTHUsuarioCambiarContrasenaForm
-from utilities.mailing import enviar_verificacion
-
 User = get_user_model()
 
 
@@ -132,7 +134,9 @@ class VerificacionAPIView(APIView):
 
 
 class CambiarContrasenaAPIView(APIView):
-
+    """
+        DOCSTRING: CambiarContrasenaAPIView, APIView responsable de la actualizacion de contraseña.
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     """
@@ -148,3 +152,66 @@ class CambiarContrasenaAPIView(APIView):
                 return Response({'error': contra_form.errors}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'error': 'Error al intentar cambiar la contraseña'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GenerarCodigoDeVerificacionAPIView(APIView):
+    """
+        DOCSTRING: GenerarCodigoDeVerificacionAPIView, APIView responsable de la generacion de email con codigo de verificacion.
+    """
+    def post(self, request):
+        # try:
+            # Recolectar payload
+            correo = request.data.get('email')
+            # Recolectar usuario con email
+            usuario = User.objects.get(email=correo)
+            # Validar existencia del usuario
+            if usuario:
+                codigo = generar_codigo()
+                CodigosVerificacion.objects.create(codigo=codigo, usuario=usuario)
+                enviar_codigo(codigo, correo)
+                return Response({'data': 'El codigo de verifiacion ha sido enviado a su correo'}, status=status.HTTP_200_OK)
+            return Response({'error': 'Email no registrado'}, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     return Response({'error': 'Error al crear codigo de verificacion'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerificarCodigoAPIView(APIView):
+    """
+        DOCSTRING: GenerarCodigoDeVerificacionAPIView, APIView responsable de la generacion de email con codigo de verificacion.
+    """
+    serializer = UTHUsuarioSerializer
+
+    def post(self, request):
+        try:
+            # Recolectar payload
+            codigo_enviado = request.data.get('codigo')
+            # Recolectar codigo
+            codigo_verificado = CodigosVerificacion.objects.get(codigo=codigo_enviado)
+            # Validar existencia del usuario
+            if codigo_verificado:
+                return Response({'data': self.serializer(codigo_verificado.usuario).data}, status=status.HTTP_200_OK)
+            return Response({'error': 'Este codigo no esta vinculado con ninguna solicitud de restauracion'}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'error': 'Error en la verificacion de codigo'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RestaurarContrasenaAPIView(APIView):
+    """
+        DOCSTRING: RestaurarContrasenaAPIView, APIView responsable de la actualizacion de contraseña.
+    """
+    def post(self, request):
+        try:
+            # Recolectar payload
+            nueva_contra = request.data.get('contra')
+            id_usuario = request.data.get('id')
+            # Recolectar usuario
+            usuario = User.objects.get(id=id_usuario)
+            usuario.set_password(nueva_contra)
+            usuario.save()
+            # Validar existencia del usuario
+            return Response({'data': 'Contraseña restaurada exitosamente'}, status=status.HTTP_200_OK)
+        except:
+            return Response({'error': 'Error la restauracion de la contraseña'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
